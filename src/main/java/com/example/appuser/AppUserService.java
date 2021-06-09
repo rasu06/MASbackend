@@ -1,0 +1,68 @@
+package com.example.appuser;
+
+import com.example.registration.token.ConfirmationToken;
+import com.example.registration.token.ConfirmationTokenService;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@AllArgsConstructor
+public class AppUserService implements UserDetailsService{
+
+
+    private final static String USER_NOT_FOUND_MSG="user with username %s not found";
+    private final AppUserRepository appUserRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final ConfirmationTokenService confirmationTokenService;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return appUserRepository.findByUsername(username)
+                .orElseThrow(()->new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG,username)));
+    }
+
+    public String signUpUser(AppUser appUser)
+    {
+       boolean userNameExist= appUserRepository.findByUsername(appUser.getUsername())      //appUser repository mai is username ko find karo
+                              .isPresent();
+       /*boolean userEmailExist= appUserRepository.findByEmail(appUser.getEmail())
+                              .isPresent();*/
+      if(userNameExist) {
+          throw new IllegalStateException("Username is already present");
+      }
+      /*if(userEmailExist){
+          throw new IllegalStateException("Email is already used");
+      }*/
+
+    String encodedPassword = bCryptPasswordEncoder.encode(appUser.getPassword());    //encode the users password
+        appUser.setPassword(encodedPassword);                     // Update the password with encoded one
+
+        appUserRepository.save(appUser);                      // Saving the user to our database
+
+        // SEND EMAIL CONFIRMATION STARTS
+        //Token Generation
+         String token= UUID.randomUUID().toString();
+        ConfirmationToken confirmationToken=new ConfirmationToken(
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(15),
+                token,
+                appUser
+        );
+        confirmationTokenService.saveConfirmationToken(confirmationToken);
+        // Email sending
+
+        return token;                                //Returning the token to RegistrationService
+    }
+    public int enableAppUser(String email) {                   //Users email is verified so update it on database
+        return appUserRepository.enableAppUser(email);
+    }
+}
