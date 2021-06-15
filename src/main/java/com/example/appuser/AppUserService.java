@@ -25,18 +25,18 @@ public class AppUserService implements UserDetailsService{
     private final ConfirmationTokenService confirmationTokenService;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return appUserRepository.findByUsername(username)
-                .orElseThrow(()->new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG,username)));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return appUserRepository.findByEmail(email)
+                .orElseThrow(()->new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG,email)));
     }
 
     public String signUpUser(AppUser appUser)
     {
-       boolean userNameExist= appUserRepository.findByUsername(appUser.getUsername())      //appUser repository mai is username ko find karo
+       boolean emailExist= appUserRepository.findByEmail(appUser.getEmail())      //appUser repository mai is username ko find karo
                               .isPresent();
        /*boolean userEmailExist= appUserRepository.findByEmail(appUser.getEmail())
                               .isPresent();*/
-      if(userNameExist) {
+      if(emailExist) {
           throw new IllegalStateException("Username is already present");
       }
       /*if(userEmailExist){
@@ -52,12 +52,12 @@ public class AppUserService implements UserDetailsService{
         //Token Generation
          String token= UUID.randomUUID().toString();
         ConfirmationToken confirmationToken=new ConfirmationToken(
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMinutes(15),
+                LocalDateTime.now(),                  //created
+                LocalDateTime.now().plusMinutes(15),      // expire
                 token,
                 appUser
         );
-        confirmationTokenService.saveConfirmationToken(confirmationToken);
+        confirmationTokenService.saveConfirmationToken(confirmationToken);    //saving our token into table confirmation_token
         // Email sending
 
         return token;                                //Returning the token to RegistrationService

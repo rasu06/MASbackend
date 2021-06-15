@@ -7,24 +7,27 @@ import com.example.email.EmailSenderRepository;
 import com.example.registration.token.ConfirmationToken;
 import com.example.registration.token.ConfirmationTokenService;
 import lombok.AllArgsConstructor;
-import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-
+import java.net.URI;
 @Service
 @AllArgsConstructor
 public class RegistrationService {
 
+
     private final EmailValidator emailValidator;
     private final AppUserService appUserService;
     private final ConfirmationTokenService confirmationTokenService;
-    private final EmailSenderRepository emailSender;
+    private final EmailSenderRepository emailSenderRepository;
 
 
     // Registration of user
-    public String register(RegistrationRequest request) {
+    public ResponseEntity<Void> register(RegistrationRequest request) {
         System.out.println(request.getEmail());
          boolean isValidEmail = emailValidator.test(request.getEmail());     // Validate the Email
          if(!isValidEmail){
@@ -45,16 +48,15 @@ public class RegistrationService {
        //////////////////////------------work to do on code below-------------------//////
 
         String link = "http://localhost:8080/api/v1/registration/confirm?token=" + token;
-        emailSender.send(                                                       //sending the email to user Id
+        emailSenderRepository.send(                                                       //sending the email to user Id
                 request.getEmail(),
                 buildEmail(request.getFirstName(), link));
 
-        return token;
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://fullstackdeveloper.guru")).build();            //
     }
     @Transactional
-    public String confirmToken(String token) {
-        ConfirmationToken confirmationToken = confirmationTokenService
-                .getToken(token)
+    public ResponseEntity<Void> confirmToken(String token) {
+        ConfirmationToken confirmationToken = confirmationTokenService.getToken(token)
                 .orElseThrow(() ->
                         new IllegalStateException("token not found"));
 
@@ -68,11 +70,14 @@ public class RegistrationService {
             throw new IllegalStateException("token expired");
         }
 
-        confirmationTokenService.setConfirmedAt(token);
+       int t= confirmationTokenService.setConfirmedAt(token);
         appUserService.enableAppUser(
                 confirmationToken.getAppUser().getEmail());
-        return "confirmed";                                    ////////========================>> here users mail is confirmed we can send user to some other page
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://www.google.com/")).build();
+        ////////========================>> here users mail is confirmed and we have enabled it ,we can send user to some other page
     }
+
+
     private String buildEmail(String name, String link) {
         return "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">\n" +
                 "\n" +

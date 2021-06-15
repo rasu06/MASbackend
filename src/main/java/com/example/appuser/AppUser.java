@@ -13,6 +13,7 @@ import java.util.Collections;
 @EqualsAndHashCode
 @AllArgsConstructor
 @Entity      // @Entity will make this a table in our database
+@Table(name = "app_user")
 public class AppUser implements UserDetails {     // CONCEPT OF INTERFACE==>If I want a class AppUser to have some methods to available outside and want to protect some methods.Then we can add non-protective methods to an Interface And then create objects of those Interface by their Reference(UserDetails) and Memory of subclass(AppUser).By this, we can protect methods of AppUser.
    @SequenceGenerator(
            name="student_sequence",
