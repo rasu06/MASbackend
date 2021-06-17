@@ -4,13 +4,14 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.ModelAndView;
 
 @RestController
-@CrossOrigin(maxAge = 3600)
 @RequestMapping(path="api/v1/registration")
 @AllArgsConstructor
 public class RegistrationController {
     private final RegistrationService registrationService;
+
 
 
     //We generally don't write the logic directly in controller, we create a separate class for logic,and pass our request body to it
@@ -26,7 +27,5 @@ public class RegistrationController {
      public ResponseEntity<Void> confirm(@RequestParam("token")String token){
         return registrationService.confirmToken(token);
      }
-
-
 
 }

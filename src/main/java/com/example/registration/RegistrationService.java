@@ -51,8 +51,7 @@ public class RegistrationService {
         emailSenderRepository.send(                                                       //sending the email to user Id
                 request.getEmail(),
                 buildEmail(request.getFirstName(), link));
-
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://fullstackdeveloper.guru")).build();            //
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://127.0.0.1:5500/verifystand.html")).build();            //
     }
     @Transactional
     public ResponseEntity<Void> confirmToken(String token) {
@@ -73,7 +72,7 @@ public class RegistrationService {
        int t= confirmationTokenService.setConfirmedAt(token);
         appUserService.enableAppUser(
                 confirmationToken.getAppUser().getEmail());
-        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("https://www.google.com/")).build();
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://127.0.0.1:5500/home.html")).build();
         ////////========================>> here users mail is confirmed and we have enabled it ,we can send user to some other page
     }
 

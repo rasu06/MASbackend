@@ -50,10 +50,14 @@ public class AppUser implements UserDetails {     // CONCEPT OF INTERFACE==>If I
         this.appUserRole = appUserRole;
     }
 
+
+
+                               //----------------Authnetication stuffs-----------------------//
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority=new SimpleGrantedAuthority(appUserRole.name());
-        return Collections.singletonList(authority);
+       /* SimpleGrantedAuthority authority=new SimpleGrantedAuthority(appUserRole.name());
+        return Collections.singletonList(authority);*/
+        return null;
     }
 
     @Override
@@ -63,7 +67,7 @@ public class AppUser implements UserDetails {     // CONCEPT OF INTERFACE==>If I
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     /*@Override
